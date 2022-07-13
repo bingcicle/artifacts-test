@@ -8,6 +8,11 @@ env:
   LATEST_CHANNEL_DIR: ./channel-fuel-latest.toml.d/
 
 jobs:
+  create-artifacts:
+    name: Index versions compatibilities
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
       - name: Create success artifact
         if: ${{ success() }}
         run: touch compatible-forc-${{ matrix.job.forc-version }}@fuel-core-${{ matrix.job.fuel-core-version }}
@@ -20,12 +25,10 @@ jobs:
           name: compatible-forc-${{ matrix.job.forc-version }}@fuel-core-${{ matrix.job.fuel-core-version }}
           path: compatible-forc-${{ matrix.job.forc-version }}@fuel-core-${{ matrix.job.fuel-core-version }}
 
-  # index-versions: This job will process the artifacts above if testing is not skipped and upload
-  # incompatible versions and/or publish a new channel-fuel-latest.toml to gh-pages.
   index-versions:
     name: Index versions compatibilities
-    needs: test-toolchain-compatibility
-    if: needs.test-toolchain-compatibility.result != 'skipped'
+    needs: create-artifacts
+    if: needs.create-artifacts.result != 'skipped'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
